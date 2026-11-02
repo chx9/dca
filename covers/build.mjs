@@ -623,8 +623,9 @@ function themePanel(d) {
 /* ───────────────────  G · 近一月走势  ───────────────────
    真实行情：data/<期号>-quotes.json（node fetch-quotes.mjs 生成）。
    三只标的以区间首日收盘价归一，画成百分比曲线；报头报脚与封面同一套。 */
-const TREND_COLORS = { IQQ: "#17243a", "BRK.B": "#d94b4b", SCHD: "#7a8492" };
-const TREND_FALLBACK = ["#17243a", "#d94b4b", "#7a8492"];
+// 三条线的颜色：亮钴蓝 · 活力橙 · 翡翠青绿（和红涨绿跌的语义色分开用）
+const TREND_COLORS = { IQQ: "#2563eb", "BRK.B": "#f07818", SCHD: "#10b981" };
+const TREND_FALLBACK = ["#2563eb", "#f07818", "#10b981"];
 // 让网格线落在好看的刻度上：1 / 2 / 2.5 / 5 / 10 的整数倍
 function niceStep(range, want = 4) {
   const raw = range / want;
