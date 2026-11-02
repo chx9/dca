@@ -9,7 +9,7 @@
 目前启用四个主题，共用同一份 JSON：
 
 - `press` 小红书封面：黑白报刊 + 中国红、粗衬线大标题
-- `panel` 账户月报（瑞士极简）：报头报脚沿用封面（红眉标 + 黑底页脚带），背景同为 `#fafaf8`；三张白卡各一行「标的 / 累计投入 / 浮盈+收益率」，底部浅灰三栏总览。深海军蓝 + 红涨绿跌，无渐变无阴影
+- `panel` 账户月报（瑞士极简）：报头报脚沿用封面（红眉标 + 黑底页脚带），背景同为 `#fafaf8`；三张白卡各一行「标的 / 本期定投 / 累计投入 / 浮盈+收益率」，底部浅灰三栏总览。深海军蓝 + 红涨绿跌，无渐变无阴影
 - `trend` 近一月走势：真实行情曲线（三只按首日收盘归一），底部明细表兼图例。数据来自 `node fetch-quotes.mjs`，没有数据时显示「暂无数据」
 - `wechat` 公众号头图（2.35:1）
 
@@ -81,10 +81,10 @@ node fetch-quotes.mjs 001 2026-10-01 2026-11-01  # 或手动指定区间
     { "label": "本期定投", "value": "6,000", "prefix": "¥" },
     { "label": "累计定投", "value": "12,000", "prefix": "¥" }
   ],
-  "holdings": [                     // 看板 / 面板用；填每只的投入和最新市值
-    { "name": "纳指", "ticker": "IQQ", "invested": 3000, "value": 3072.6, "shares": 12.5 },
-    { "name": "伯克希尔", "ticker": "BRK.B", "invested": 2000, "value": 2015.4, "shares": 4.2 },
-    { "name": "高股息", "ticker": "SCHD", "invested": 1000, "value": 993.8, "shares": 10.3 }
+  "holdings": [                     // 看板 / 面板用；填每只的本期定投、累计投入和最新市值
+    { "name": "纳指", "ticker": "IQQ", "period": 3000, "invested": 3000, "value": 3072.6, "shares": 12.5 },
+    { "name": "伯克希尔", "ticker": "BRK.B", "period": 2000, "invested": 2000, "value": 2015.4, "shares": 4.2 },
+    { "name": "高股息", "ticker": "SCHD", "period": 1000, "invested": 1000, "value": 993.8, "shares": 10.3 }
   ],
   "dividend": 0                     // 累计收到的现金分红，不填就显示「暂无数据」
 }

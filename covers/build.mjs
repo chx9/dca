@@ -370,11 +370,12 @@ function themePanel(d) {
   const SKIN = [{ badge: "#1e7fd4" }, { badge: "#1b3a66" }, { badge: "#009fe3" }];
 
   const rows = hs.map((h) => {
+    const per = h.period ?? null;
     const inv = h.invested ?? null;
     const val = h.value ?? null;
     const pnl = inv != null && val != null ? val - inv : null;
     const rate = inv != null && val != null && inv !== 0 ? ((val - inv) / inv) * 100 : null;
-    return { ...h, inv, val, pnl, rate };
+    return { ...h, per, inv, val, pnl, rate };
   });
 
   const hasAll = rows.length > 0 && rows.every((r) => r.inv != null && r.val != null);
@@ -385,9 +386,9 @@ function themePanel(d) {
   const pnlText = (n) => (n == null ? NA : `${n >= 0 ? "+" : "−"}¥${Math.abs(n).toLocaleString("en-US", { maximumFractionDigits: 0 })}`);
   const ovSize = fitFont([money(totalIn), money(totalVal), pnlText(totalPnl)], 246, 78, 34);
 
-  // 每只一行横排：左边标的，右边累计投入 / 浮盈两栏，金额有整幅宽度可用
-  const rowMoney = rows.flatMap((h) => [money(h.inv), pnlText(h.pnl)]);
-  const rowSize = fitFont(rowMoney, 240, 66, 36);
+  // 每只一行横排：左边标的，右边本期定投 / 累计投入 / 浮盈三栏，金额均分剩余宽度
+  const rowMoney = rows.flatMap((h) => [money(h.per), money(h.inv), pnlText(h.pnl)]);
+  const rowSize = fitFont(rowMoney, 152, 60, 32);
   const cards = (rows.length ? rows : [{}, {}, {}])
     .map((h, i) => {
       const s = SKIN[i % 3];
@@ -407,6 +408,7 @@ function themePanel(d) {
           ${showTk ? `<div class="ct">${esc(tk)}</div>` : ""}
         </div>
       </div>
+      <div class="cell"><div class="k">本期定投</div><div class="v" style="font-size:${rowSize}px">${money(h.per)}</div><div class="pv ghost">　</div></div>
       <div class="cell"><div class="k">累计投入</div><div class="v" style="font-size:${rowSize}px">${money(h.inv)}</div><div class="pv ghost">　</div></div>
       <div class="cell"><div class="k">浮盈</div><div class="v ${tone(h.pnl)}" style="font-size:${rowSize}px">${pnlText(h.pnl)}</div><div class="pv ${tone(h.pnl)}">${pctParen(h.rate)}</div></div>
     </div>`;
