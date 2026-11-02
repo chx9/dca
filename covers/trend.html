@@ -1,0 +1,393 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>近一月走势 · 美股定投实录</title>
+<style>
+  :root {
+    --paper: #fafaf8;
+    --ink: #17243a;
+    --muted: #5f6975;
+    --faint: #e5e7eb;
+    --rule: #1a1a1a;
+    --red: #c8161d;
+    --up: #d94b4b;    /* 涨 */
+    --dn: #16866a;    /* 跌 */
+    --s1: #2563eb;    /* IQQ   亮钴蓝 */
+    --s2: #f07818;    /* BRK.B 活力橙 */
+    --s3: #10b981;    /* SCHD  翡翠青绿 */
+  }
+  * { box-sizing: border-box; }
+  html, body { margin: 0; background: var(--paper); color: var(--ink); }
+  body {
+    font-family: "Helvetica Neue", "Inter", -apple-system, "PingFang SC", sans-serif;
+    font-variant-numeric: tabular-nums;
+    -webkit-font-smoothing: antialiased;
+  }
+  .wrap { max-width: 1120px; margin: 0 auto; padding: 64px 40px 96px; }
+
+  /* 报头 —— 与封面、走势图同一套 */
+  .top { display: flex; justify-content: space-between; align-items: baseline;
+         font-size: 15px; letter-spacing: 5px; font-weight: 700; color: var(--red); }
+  .top .issue { color: var(--rule); }
+  .rule { height: 1px; margin-top: 14px; background: var(--rule); }
+  .counters { margin-top: 26px; font-size: 32px; font-weight: 700; letter-spacing: 4px; color: var(--red); }
+  .counters .sep { margin: 0 8px; color: var(--rule); letter-spacing: 0; font-weight: 500; }
+
+  /* 标题 */
+  .ttl { margin-top: 44px; }
+  .h1 { font-size: 40px; font-weight: 700; letter-spacing: 1px; line-height: 1.15; }
+  .sub { margin-top: 10px; font-size: 14px; color: var(--muted); letter-spacing: .3px; line-height: 1.7; }
+
+  /* 图例 */
+  .legend { display: flex; flex-wrap: wrap; gap: 28px; margin: 34px 0 0; padding: 0; list-style: none; }
+  .legend li { display: flex; align-items: center; gap: 10px; font-size: 15px; font-weight: 600; }
+  .legend .key { width: 22px; height: 2.5px; border-radius: 2px; flex: none; }
+  .legend .tk { font-size: 12px; font-weight: 500; letter-spacing: 1.5px; color: var(--muted); }
+
+  /* 图表 */
+  .chart-wrap { position: relative; margin-top: 18px; }
+  .chart-wrap svg { display: block; width: 100%; height: auto; touch-action: pan-y; }
+  .chart-wrap:focus { outline: none; }
+  .chart-wrap:focus-visible { outline: 2px solid var(--s1); outline-offset: 6px; border-radius: 4px; }
+
+  .tip {
+    position: absolute; top: 0; left: 0; pointer-events: none; opacity: 0;
+    transition: opacity .12s ease;
+    min-width: 250px; padding: 14px 16px 12px;
+    background: #fff; border: 1px solid var(--faint); border-radius: 10px;
+    box-shadow: 0 8px 24px rgba(23, 36, 58, .10);
+    transform: translateY(-100%);
+  }
+  .tip.on { opacity: 1; }
+  .tip .d { font-size: 13px; font-weight: 700; letter-spacing: .5px; color: var(--ink); }
+  .tip .w { font-size: 12px; font-weight: 500; color: var(--muted); margin-left: 6px; }
+  .tip table { border-collapse: collapse; margin-top: 10px; width: 100%; }
+  .tip td { padding: 5px 0; font-size: 13px; white-space: nowrap; vertical-align: baseline; }
+  .tip .nm { display: flex; align-items: center; gap: 8px; color: var(--muted); font-weight: 500; padding-right: 14px; }
+  .tip .nm i { width: 14px; height: 2.5px; border-radius: 2px; flex: none; }
+  .tip .px { text-align: right; font-weight: 700; color: var(--ink); padding-right: 14px; }
+  .tip .cd { text-align: right; font-weight: 700; font-size: 13px; }
+  .tip td.cd + td.cd { padding-left: 12px; }
+  .tip .cd.up { color: var(--up); }
+  .tip .cd.dn { color: var(--dn); }
+  .tip .cd.miss { color: var(--muted); font-weight: 500; }
+  .tip .foot { margin-top: 10px; padding-top: 9px; border-top: 1px solid var(--faint);
+               font-size: 11.5px; color: var(--muted); letter-spacing: .3px; }
+
+  /* 明细表：图例之外，也是不用鼠标也能读到每个值的兜底 */
+  .tblwrap { margin-top: 44px; overflow-x: auto; }
+  table.data { border-collapse: collapse; width: 100%; min-width: 760px; }
+  table.data th, table.data td { padding: 9px 10px; text-align: right; font-size: 13px; white-space: nowrap; }
+  table.data th:first-child, table.data td:first-child { text-align: left; padding-left: 0; }
+  table.data thead th { font-size: 11px; font-weight: 600; letter-spacing: 1.5px; color: var(--muted);
+                        border-bottom: 1px solid var(--rule); padding-bottom: 10px; }
+  table.data thead tr.series th { padding-top: 12px; }
+  table.data tbody td { border-bottom: 1px solid var(--faint); color: var(--ink); }
+  table.data tbody tr:hover td { background: #f2f3f1; }
+  table.data .up { color: var(--up); }
+  table.data .dn { color: var(--dn); }
+  table.data .dim { color: var(--muted); }
+  .srclink { margin-top: 18px; font-size: 12px; color: var(--muted); line-height: 1.8; }
+
+  .empty { margin-top: 40px; padding: 80px 20px; border: 1px solid var(--faint); border-radius: 14px;
+           text-align: center; color: var(--muted); font-size: 15px; letter-spacing: 2px; line-height: 2; }
+  .empty code { font-size: 13px; background: #f0f1ee; padding: 2px 6px; border-radius: 4px; }
+
+  @media (max-width: 720px) {
+    .wrap { padding: 36px 18px 64px; }
+    .h1 { font-size: 30px; }
+    .counters { font-size: 24px; letter-spacing: 3px; }
+    .tip { min-width: 210px; }
+  }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <div class="top"><div>美股定投实录</div><div class="issue" id="issue-date"></div></div>
+  <div class="rule"></div>
+  <div class="counters" id="counters"></div>
+
+  <div class="ttl">
+    <div class="h1">近一月走势</div>
+    <div class="sub" id="sub">正在读取行情…</div>
+  </div>
+
+  <ul class="legend" id="legend"></ul>
+
+  <div class="chart-wrap" id="chart" tabindex="0" role="img"
+       aria-label="三只标的近一月走势折线图，移动鼠标或按左右方向键查看每个交易日的数据">
+    <div class="tip" id="tip" role="status" aria-live="polite"></div>
+  </div>
+
+  <div class="tblwrap" id="tblwrap" hidden></div>
+
+  <p class="srclink" id="srclink"></p>
+</div>
+
+<script>
+(async () => {
+  // 期号：默认 001，也可以用 ?issue=002 切到别的期
+  const ISSUE = (new URLSearchParams(location.search).get("issue") || "001").padStart(3, "0");
+  const S = 1000, H = 560;          // SVG 内部坐标
+  const PT = 16, PB = 58, PL = 8, PR = 84;
+  const PW = S - PL - PR, PH = H - PT - PB;
+  const COLORS = { "IQQ": "#2563eb", "BRK.B": "#f07818", "SCHD": "#10b981" };
+  const FALLBACK = ["#2563eb", "#f07818", "#10b981"];
+  const WEEK = ["周日", "周一", "周二", "周三", "周四", "周五", "周六"];
+
+  const $ = (id) => document.getElementById(id);
+  const esc = (s) => String(s).replace(/[&<>"']/g, (c) =>
+    ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" })[c]);
+  const md = (iso) => `${Number(iso.slice(5, 7))}.${iso.slice(8, 10)}`;
+  const signed = (v, dec) => `${v > 0 ? "+" : v < 0 ? "−" : ""}${Math.abs(v).toFixed(dec)}%`;
+  const tone = (v) => (v > 0 ? "up" : v < 0 ? "dn" : "");
+
+  // 与 build.mjs 的刻度算法一致：1 / 2 / 2.5 / 5 / 10 的整数倍
+  function niceStep(range, want = 4) {
+    const raw = range / want;
+    const mag = Math.pow(10, Math.floor(Math.log10(raw)));
+    return [1, 2, 2.5, 5, 10].map((m) => m * mag).find((v) => v >= raw) || 10 * mag;
+  }
+
+  // 有内嵌数据就直接用（离线单文件 / 截图预览）；否则从服务器拉
+  let issue = window.__ISSUE__ || null, data = window.__QUOTES__ || null;
+  if (!issue || !data) {
+    try {
+      const [ri, rq] = await Promise.all([
+        fetch("issues/" + ISSUE + ".json", { cache: "no-store" }),
+        fetch("data/" + ISSUE + "-quotes.json", { cache: "no-store" }),
+      ]);
+      if (!issue && ri.ok) issue = await ri.json();
+      if (!data && rq.ok) data = await rq.json();
+    } catch (_) { /* 下面统一提示 */ }
+  }
+
+  if (issue) {
+    $("issue-date").textContent = issue.date || "";
+    const day = (() => {
+      if (Number(issue.day)) return String(issue.day).padStart(2, "0");
+      if (!issue.start) return null;
+      const [y, m] = String(issue.date).split(".").map(Number);
+      const n = Math.floor((Date.UTC(y, (m || 1) - 1, 1) - Date.parse(issue.start + "T00:00:00Z")) / 86400000) + 1;
+      return n > 0 ? String(n).padStart(2, "0") : "01";
+    })();
+    $("counters").innerHTML =
+      (day ? "第 " + day + " 天" : "") +
+      (day ? '<span class="sep">·</span>' : "") +
+      "第 " + String(issue.issue).padStart(2, "0") + " 期";
+  }
+
+  if (!data || !Array.isArray(data.series) || !data.series.length || !data.from) {
+    $("sub").textContent = "暂无数据";
+    $("chart").insertAdjacentHTML("beforeend",
+      '<div class="empty">还没拉到行情数据<br>先跑 <code>node fetch-quotes.mjs ' + ISSUE + '</code>，刷新即可</div>');
+    return;
+  }
+
+  /* ── 数据整形：以区间首日收盘价为 0%，同时算每个交易日的当日涨跌 ── */
+  const series = data.series.map((s, i) => {
+    const base = s.points[0].c;
+    const prev = s.prev && Number.isFinite(s.prev.c) ? s.prev.c : null;
+    const pts = s.points.map((p, k) => {
+      const before = k === 0 ? prev : s.points[k - 1].c;
+      return {
+        d: p.d, c: p.c,
+        v: (p.c / base - 1) * 100,                     // 区间涨跌
+        day: before == null ? null : (p.c / before - 1) * 100,  // 当日涨跌
+      };
+    });
+    return {
+      ticker: s.ticker,
+      name: s.name,
+      color: COLORS[String(s.ticker).toUpperCase()] || FALLBACK[i % FALLBACK.length],
+      pts,
+    };
+  });
+
+  const n = series[0].pts.length;
+  const dates = series[0].pts.map((p) => p.d);
+  const all = series.flatMap((s) => s.pts.map((p) => p.v));
+  const step = niceStep(Math.max(...all) - Math.min(...all), 4);
+  const yMin = Math.floor(Math.min(0, ...all) / step) * step;
+  const yMax = Math.ceil(Math.max(0, ...all) / step) * step;
+  const X = (i) => PL + (n === 1 ? 0 : (i / (n - 1)) * PW);
+  const Y = (v) => PT + ((yMax - v) / (yMax - yMin)) * PH;
+
+  /* ── 网格 + 轴 ── */
+  let svg = "";
+  for (let v = yMin; v <= yMax + 1e-9; v += step) {
+    const y = Y(v).toFixed(1), zero = Math.abs(v) < 1e-9;
+    svg += `<line x1="${PL}" y1="${y}" x2="${PL + PW}" y2="${y}" stroke="${zero ? "#c6cbd3" : "#ececea"}" stroke-width="1"/>`;
+    svg += `<text x="${PL + PW + 18}" y="${y}" dy="0.35em" fill="${zero ? "#17243a" : "#5f6975"}" ` +
+           `font-size="13" font-weight="${zero ? 700 : 500}">${zero ? "0" : signed(v, 0)}</text>`;
+  }
+  const tickIdx = [...new Set([0, Math.round((n - 1) / 3), Math.round(((n - 1) * 2) / 3), n - 1])];
+  svg += tickIdx.map((i) => {
+    const anchor = i === 0 ? "start" : i === n - 1 ? "end" : "middle";
+    return `<text x="${X(i).toFixed(1)}" y="${H - 20}" text-anchor="${anchor}" fill="#5f6975" font-size="13">${md(dates[i])}</text>`;
+  }).join("");
+
+  /* ── 三条线 + 末端点 ── */
+  svg += series.map((s) => {
+    const d = s.pts.map((p, i) => `${i ? "L" : "M"}${X(i).toFixed(1)} ${Y(p.v).toFixed(1)}`).join(" ");
+    const last = s.pts.length - 1;
+    return `<path d="${d}" fill="none" stroke="${s.color}" stroke-width="2.5" stroke-linejoin="round" stroke-linecap="round"/>` +
+           `<circle cx="${X(last).toFixed(1)}" cy="${Y(s.pts[last].v).toFixed(1)}" r="4.5" fill="${s.color}" stroke="#fafaf8" stroke-width="2"/>`;
+  }).join("");
+
+  /* ── 十字线（默认隐藏） ── */
+  svg += `<g id="cross" opacity="0">
+    <line id="crossline" x1="0" y1="${PT}" x2="0" y2="${PT + PH}" stroke="#9aa3ae" stroke-width="1"/>` +
+    series.map((s, i) =>
+      `<circle id="dot${i}" r="5" fill="${s.color}" stroke="#fafaf8" stroke-width="2.5"/>`).join("") +
+    `</g>`;
+  svg += `<rect id="hit" x="${PL}" y="${PT}" width="${PW}" height="${PH}" fill="transparent"/>`;
+
+  const chart = $("chart");
+  const tip = $("tip");
+  chart.insertAdjacentHTML("beforeend",
+    `<svg viewBox="0 0 ${S} ${H}" preserveAspectRatio="xMidYMid meet">${svg}</svg>`);
+
+  /* ── 图例 ── */
+  $("legend").innerHTML = series.map((s) => {
+    const dup = String(s.ticker).toUpperCase() === String(s.name).trim().toUpperCase();
+    return `<li><span class="key" style="background:${s.color}"></span>` +
+      `<span>${esc(s.name)}</span>${dup ? "" : `<span class="tk">${esc(s.ticker)}</span>`}</li>`;
+  }).join("");
+
+  $("sub").textContent =
+    `${data.from.replace(/-/g, ".")} – ${data.to.replace(/-/g, ".")} · 以区间首日收盘价为基准 · ` +
+    `数据来源 东方财富${data.fetchedAt ? " · 抓取于 " + data.fetchedAt.slice(0, 10) : ""}`;
+
+  /* ── 悬停：十字线吸附到最近的交易日，读数覆盖全部三只标的 ── */
+  const svgEl = chart.querySelector("svg");
+  const cross = chart.querySelector("#cross");
+  const crossline = chart.querySelector("#crossline");
+  let at = -1;
+
+  function show(i) {
+    at = Math.max(0, Math.min(n - 1, i));
+    const x = X(at);
+    crossline.setAttribute("x1", x); crossline.setAttribute("x2", x);
+    series.forEach((s, k) => {
+      const dot = chart.querySelector("#dot" + k);
+      dot.setAttribute("cx", x);
+      dot.setAttribute("cy", Y(s.pts[at].v).toFixed(1));
+    });
+    cross.setAttribute("opacity", "1");
+    renderTip(at);
+  }
+
+  function hide() {
+    at = -1;
+    cross.setAttribute("opacity", "0");
+    tip.classList.remove("on");
+  }
+
+  // 悬停层的文字一律走 textContent，不拼 innerHTML
+  function renderTip(i) {
+    const d = dates[i];
+    const wd = WEEK[new Date(d + "T00:00:00").getDay()];
+    tip.replaceChildren();
+
+    const head = document.createElement("div");
+    head.className = "d";
+    head.textContent = d;
+    const wk = document.createElement("span");
+    wk.className = "w"; wk.textContent = wd;
+    head.appendChild(wk);
+    tip.appendChild(head);
+
+    const t = document.createElement("table");
+    for (const s of series) {
+      const p = s.pts[i];
+      const tr = document.createElement("tr");
+
+      const nm = document.createElement("td");
+      nm.className = "nm";
+      const key = document.createElement("i");
+      key.style.background = s.color;
+      nm.appendChild(key);
+      nm.appendChild(document.createTextNode(s.name));
+      tr.appendChild(nm);
+
+      const px = document.createElement("td");
+      px.className = "px";
+      px.textContent = p.c.toFixed(2);
+      tr.appendChild(px);
+
+      const cd = document.createElement("td");
+      cd.className = "cd " + (p.day == null ? "miss" : tone(p.day));
+      cd.textContent = p.day == null ? "—" : signed(p.day, 2);   // 当日涨跌
+      tr.appendChild(cd);
+
+      const cu = document.createElement("td");
+      cu.className = "cd " + tone(p.v);
+      cu.style.fontWeight = "500";
+      cu.textContent = signed(p.v, 2);                            // 区间累计
+      tr.appendChild(cu);
+
+      t.appendChild(tr);
+    }
+    tip.appendChild(t);
+
+    const foot = document.createElement("div");
+    foot.className = "foot";
+    foot.textContent = "收盘价 · 当日 = 较前一交易日 · 区间 = 较首日";
+    tip.appendChild(foot);
+
+    // 定位：贴着十字线，超出容器就翻到另一侧
+    const rect = chart.getBoundingClientRect();
+    const px = (X(i) / S) * rect.width;
+    const py = Math.min(...series.map((s) => Y(s.pts[i].v))) / H * rect.height;
+    tip.classList.add("on");
+    const tw = tip.offsetWidth;
+    let left = px + 18;
+    if (left + tw > rect.width - 8) left = px - 18 - tw;
+    tip.style.left = Math.max(4, left) + "px";
+    tip.style.top = Math.max(tip.offsetHeight + 8, py - 12) + "px";
+  }
+
+  function indexFromEvent(e) {
+    const rect = svgEl.getBoundingClientRect();
+    const x = (e.clientX - rect.left) / rect.width * S;
+    const ratio = (x - PL) / PW;
+    return Math.round(ratio * (n - 1));
+  }
+
+  svgEl.addEventListener("pointermove", (e) => show(indexFromEvent(e)));
+  svgEl.addEventListener("pointerdown", (e) => show(indexFromEvent(e)));
+  svgEl.addEventListener("pointerleave", hide);
+  chart.addEventListener("keydown", (e) => {
+    if (e.key === "ArrowRight") { e.preventDefault(); show(at < 0 ? 0 : at + 1); }
+    else if (e.key === "ArrowLeft") { e.preventDefault(); show(at < 0 ? n - 1 : at - 1); }
+    else if (e.key === "Escape") hide();
+  });
+  chart.addEventListener("focus", () => { if (at < 0) show(n - 1); });
+  chart.addEventListener("blur", hide);
+
+  /* ── 明细表：不悬停也能读到每个值 ── */
+  const head = `<tr>
+    <th>日期</th>
+    ${series.map((s) => `<th>${esc(s.name)} 收盘</th><th>当日</th>`).join("")}
+  </tr>`;
+  const body = dates.map((d, i) => {
+    const cells = series.map((s) => {
+      const p = s.pts[i];
+      const cd = p.day == null ? "—" : signed(p.day, 2);
+      return `<td>${p.c.toFixed(2)}</td><td class="${p.day == null ? "dim" : tone(p.day)}">${cd}</td>`;
+    }).join("");
+    return `<tr><td>${d}</td>${cells}</tr>`;
+  }).join("");
+  $("tblwrap").innerHTML = `<table class="data"><thead>${head}</thead><tbody>${body}</tbody></table>`;
+  $("tblwrap").hidden = false;
+
+  $("srclink").textContent =
+    `${data.source || "东方财富"} · 前复权收盘价 · 三只标的取共同交易日（${n} 个）· 缺数据处显示「—」，不补值。` +
+    `「当日」为较前一交易日收盘价的涨跌幅${series.some((s) => s.pts[0].day == null) ? "；区间首日无前一日收盘，记为「—」" : ""}。`;
+})();
+</script>
+</body>
+</html>

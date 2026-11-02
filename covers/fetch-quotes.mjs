@@ -35,6 +35,18 @@ const get = (url) =>
       .on("error", reject);
   });
 
+// 网络抖动/限流时重试，仍失败就抛错（这只标的记为缺失，不拿别的源顶替）
+const getRetry = async (url, tries = 3) => {
+  for (let i = 0; ; i++) {
+    try {
+      return await get(url);
+    } catch (e) {
+      if (i >= tries - 1) throw e;
+      await new Promise((r) => setTimeout(r, 1500 * (i + 1)));
+    }
+  }
+};
+
 const issueId = (process.argv[2] || "001").padStart(3, "0");
 const issue = JSON.parse(readFileSync(join(ROOT, "issues", `${issueId}.json`), "utf8"));
 
@@ -50,13 +62,29 @@ const [d0, d1] = process.argv[3]
   ? [process.argv[3].replace(/-/g, ""), (process.argv[4] || "").replace(/-/g, "") || "20500101"]
   : lastMonth(issue.date);
 
+const isoOf = (s) => `${s.slice(0, 4)}-${s.slice(4, 6)}-${s.slice(6, 8)}`;
+const shift = (s, n) => {
+  const d = new Date(`${isoOf(s)}T00:00:00Z`);
+  d.setUTCDate(d.getUTCDate() + n);
+  return d.toISOString().slice(0, 10).replace(/-/g, "");
+};
+// 多往前抓一段，用来算区间第一天的「当日涨跌」（需要前一个交易日的收盘价）
+const fromIso = isoOf(d0);
+const beg = shift(d0, -12);
+
 const rows = [];
 for (const h of issue.holdings || []) {
   const id = secid(h.ticker);
   const url =
     `https://push2his.eastmoney.com/api/qt/stock/kline/get?secid=${id}` +
-    `&fields1=f1,f2&fields2=f51,f53&klt=101&fqt=1&beg=${d0}&end=${d1}`;
-  const raw = await get(url);
+    `&fields1=f1,f2&fields2=f51,f53&klt=101&fqt=1&beg=${beg}&end=${d1}`;
+  let raw = null;
+  try {
+    raw = await getRetry(url);
+  } catch (e) {
+    console.error(`✗ ${h.ticker} (${id}) 网络错误：${e.message}`);
+    continue;
+  }
   let data = null;
   try {
     data = JSON.parse(raw).data;
@@ -78,6 +106,19 @@ for (const h of issue.holdings || []) {
   );
 }
 
+// 任何一只没拿到都不覆盖旧文件：宁可留旧数据，也不写缺一条腿的行情
+const want = (issue.holdings || []).length;
+if (rows.length < want) {
+  console.error(`\n✗ 只拿到 ${rows.length}/${want} 只，未写入（旧数据保留）。网络恢复后重跑即可。`);
+  process.exit(1);
+}
+
+// 区间第一天的「当日涨跌」要拿它前一个交易日的收盘价；抓不到就记为 null，不补
+for (const r of rows) {
+  r.prev = r.points.filter((p) => p.d < fromIso).at(-1) || null;
+  r.points = r.points.filter((p) => p.d >= fromIso);
+}
+
 // 只保留三只都有报价的交易日，避免某只停牌把线画歪
 const common = rows.length
   ? rows
@@ -91,7 +132,13 @@ const out = {
   to: common.at(-1) || null,
   fetchedAt: new Date().toISOString(),
   source: "东方财富 push2his · 日 K 收盘价",
-  series: rows.map((r) => ({ ticker: r.ticker, name: r.name, secid: r.secid, points: r.points })),
+  series: rows.map((r) => ({
+    ticker: r.ticker,
+    name: r.name,
+    secid: r.secid,
+    prev: r.prev,
+    points: r.points,
+  })),
 };
 
 if (!existsSync(join(ROOT, "data"))) mkdirSync(join(ROOT, "data"));
