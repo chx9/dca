@@ -1,0 +1,8 @@
+# 生成物：跑一遍 node build.mjs 就能还原，不入库
+covers/out/
+covers/.build/
+covers/gallery.html
+
+# 系统
+.DS_Store
+node_modules/

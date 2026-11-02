@@ -1,0 +1,51 @@
+{
+  "issue": 1,
+  "date": "2026.11",
+  "month": "2026 年 11 月",
+  "start": "2026-11-01",
+  "title": [
+    "*十年定投*",
+    "~纳指、伯克希尔、SCHD"
+  ],
+  "kicker": "坚持定投 · 慢慢变富 · 早日退休",
+  "handle": "@奔放游民",
+  "tickers": [
+    "IQQ",
+    "BRK.B",
+    "SCHD"
+  ],
+  "stats": [
+    {
+      "label": "本期定投",
+      "value": "6,000",
+      "prefix": "¥"
+    },
+    {
+      "label": "累计定投",
+      "value": "6,000",
+      "prefix": "¥"
+    }
+  ],
+  "years": 10,
+  "yearOf": 1,
+  "holdings": [
+    {
+      "name": "纳指",
+      "ticker": "IQQ",
+      "invested": 3000,
+      "value": 3072.6
+    },
+    {
+      "name": "伯克希尔",
+      "ticker": "BRK.B",
+      "invested": 2000,
+      "value": 2015.4
+    },
+    {
+      "name": "SCHD",
+      "ticker": "SCHD",
+      "invested": 1000,
+      "value": 993.8
+    }
+  ]
+}
