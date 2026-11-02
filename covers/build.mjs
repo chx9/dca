@@ -341,141 +341,6 @@ function themeWechat(d) {
   );
 }
 
-/* ───────────────────  E · 持仓看板（第二张图）  ───────────────────
-   投了多少钱、现在值多少、每只浮盈多少。报刊版式 + 零轴左右延伸的对比条，
-   同一尺度下直接比长度，比一串数字直观。 */
-const grouped = (n) => Math.abs(n).toLocaleString("en-US", { maximumFractionDigits: 0 });
-const money = (n) => `${n < 0 ? "−" : ""}${grouped(n)}`;
-const signedMoney = (n) => `${n >= 0 ? "+" : "−"}${grouped(n)}`;
-const pctStr = (n) => `${n >= 0 ? "+" : "−"}${Math.abs(n).toFixed(2)}%`;
-
-function themeDashboard(d) {
-  const hs = (d.holdings || []).map((h) => {
-    const pnl = h.value - h.invested;
-    return { ...h, pnl, pct: h.invested ? (pnl / h.invested) * 100 : 0 };
-  });
-  if (!hs.length) return themePress(d);
-
-  const invested = hs.reduce((s, h) => s + h.invested, 0);
-  const value = hs.reduce((s, h) => s + h.value, 0);
-  const pnl = value - invested;
-  const pct = invested ? (pnl / invested) * 100 : 0;
-  // 三只共用一个比例尺，条长才能互相比较；最小 0.5% 兜底，避免全 0 时除零
-  const scale = Math.max(...hs.map((h) => Math.abs(h.pct)), 0.5);
-
-  // 条形 = 本金（黑）+ 浮盈（红尖）；亏了就反过来，本金尾巴被绿色斜纹吃掉一段。
-  // 三只共用同一根比例尺，条长直接比较"现在值多少钱"。
-  const scaleMax = Math.max(...hs.map((h) => Math.max(h.invested, h.value)), 1);
-
-  const rows = hs
-    .map((h) => {
-      const up = h.pnl >= 0;
-      const wI = (h.invested / scaleMax) * 100;
-      const wV = (h.value / scaleMax) * 100;
-      const tail = up
-        ? `<span class="seg gain" style="left:${wI}%;width:${Math.max(wV - wI, 0.8)}%"></span>`
-        : `<span class="seg loss" style="left:${wV}%;width:${Math.max(wI - wV, 0.8)}%"></span>`;
-      return `<div class="row">
-      <div class="rh">
-        <div class="nm">${esc(h.name)}<span class="tk">${esc(h.ticker || "")}</span></div>
-        <div class="pct ${up ? "up" : "dn"}">${pctStr(h.pct)}</div>
-      </div>
-      <div class="nums">
-        <span class="npl">投入 <b>¥${money(h.invested)}</b></span>
-        <span class="arr">→</span>
-        <span class="npl">现在 <b class="${up ? "up" : "dn"}">¥${money(h.value)}</b></span>
-        <span class="pnl ${up ? "up" : "dn"}">${up ? "+" : "−"}¥${grouped(h.pnl)}</span>
-      </div>
-      <div class="bar"><span class="seg inv" style="width:${wI}%"></span>${tail}</div>
-    </div>`;
-    })
-    .join("");
-
-  return base(
-    `
-  body {
-    background-color:#faf8f4;
-    background-image:
-      repeating-linear-gradient(to right, rgba(26,26,26,.05) 0 1px, transparent 1px 27px),
-      repeating-linear-gradient(to bottom, rgba(26,26,26,.05) 0 1px, transparent 1px 27px);
-    color:#1a1a1a;
-    font-family:-apple-system,"PingFang SC",sans-serif;
-  }
-  .content { position:absolute; inset:96px 88px 126px; display:flex; flex-direction:column; }
-  .top { display:flex; justify-content:space-between; align-items:baseline; font-size:23px; letter-spacing:6px; font-weight:700; color:#c8161d; }
-  .top .issue { color:#1a1a1a; }
-  .rule { height:1px; margin-top:22px; background:#1a1a1a; }
-  .counters { margin-top:34px; font-size:50px; font-weight:700; letter-spacing:5px; color:#c8161d; }
-  .counters .sep { margin:0 6px; color:#1a1a1a; letter-spacing:0; }
-
-  .hero { margin-top:44px; }
-  .hero .lbl { font-size:22px; letter-spacing:7px; color:#6a6a6a; }
-  .heroRow { display:flex; align-items:baseline; gap:30px; margin-top:2px; }
-  .big { font-family:"DIN Alternate","Helvetica Neue",sans-serif; font-size:142px; font-weight:700; line-height:1.02; color:#c8161d; }
-  .big .cur { font-size:66px; font-weight:500; margin-right:6px; letter-spacing:-1px; }
-  .big.dn, .big.dn .cur { color:#2b6b50; }
-  .pctBig { font-family:"DIN Alternate","Helvetica Neue",sans-serif; font-size:64px; font-weight:700; color:#c8161d; }
-  .pctBig.dn { color:#2b6b50; }
-  .meta { display:flex; align-items:center; gap:42px; margin-top:24px; padding-top:20px; border-top:1px solid #cfc9bf; }
-  .meta .mcol { font-size:22px; letter-spacing:4px; color:#6a6a6a; }
-  .meta b { display:block; margin-top:6px; font-family:"DIN Alternate","Helvetica Neue",sans-serif; font-size:54px; font-weight:700; letter-spacing:0; color:#1a1a1a; }
-  .meta b.up { color:#c8161d; }
-  .meta b.dn { color:#2b6b50; }
-  .meta .arr2 { font-size:46px; color:#b9b1a2; }
-
-  .sec { display:flex; justify-content:space-between; align-items:baseline; margin-top:34px; padding-top:20px; border-top:3px solid #111; }
-  .sec .t { font-size:26px; font-weight:700; letter-spacing:6px; }
-  .sec .r { font-size:19px; letter-spacing:3px; color:#8a8a8a; }
-
-  .rows { flex:1; display:flex; flex-direction:column; justify-content:space-evenly; padding-bottom:8px; }
-  .rh { display:flex; justify-content:space-between; align-items:baseline; }
-  .nm { font-family:Georgia,"Songti SC","Source Han Serif SC",serif; font-size:46px; font-weight:700; letter-spacing:2px; }
-  .nm .tk { margin-left:16px; font-family:"DIN Alternate","Helvetica Neue",sans-serif; font-size:23px; font-weight:500; letter-spacing:3px; color:#8a8a8a; }
-  .pct { font-family:"DIN Alternate","Helvetica Neue",sans-serif; font-size:48px; font-weight:700; }
-  .up { color:#c8161d; }
-  .dn { color:#2b6b50; }
-
-  .nums { display:flex; align-items:baseline; gap:14px; margin-top:8px; }
-  .npl { font-size:22px; letter-spacing:3px; color:#6a6a6a; }
-  .npl b { margin-left:8px; font-family:"DIN Alternate","Helvetica Neue",sans-serif; font-size:52px; font-weight:700; letter-spacing:0; color:#1a1a1a; }
-  .arr { font-size:34px; color:#b9b1a2; margin:0 6px; }
-  .pnl { margin-left:auto; font-family:"DIN Alternate","Helvetica Neue",sans-serif; font-size:44px; font-weight:700; }
-
-  .bar { position:relative; height:16px; margin-top:16px; background:#e7e2d8; }
-  .bar .seg { position:absolute; top:0; bottom:0; }
-  .bar .inv { background:#1a1a1a; }
-  .bar .gain { background:#c8161d; }
-  .bar .loss { background:repeating-linear-gradient(45deg,#2b6b50 0 6px,#3f7f62 6px 12px); }
-
-  .band { position:absolute; left:0; right:0; bottom:0; height:126px; background:#111; color:#faf8f4; display:flex; align-items:center; justify-content:space-between; padding:0 88px; }
-  .band .l { font-family:"DIN Alternate","Helvetica Neue",sans-serif; font-size:27px; letter-spacing:2px; }
-  .band .r { font-size:23px; letter-spacing:5px; color:#cbbfb2; }
-`,
-    `<div class="content">
-    <div class="top"><div>美股定投实录</div><div class="issue">${esc(d.date)}</div></div>
-    <div class="rule"></div>
-    ${counters(d)}
-
-    <div class="hero">
-      <div class="lbl">累计浮盈</div>
-      <div class="heroRow">
-        <div class="big${pnl < 0 ? " dn" : ""}"><span class="cur">${pnl < 0 ? "−" : "+"}¥</span>${grouped(pnl)}</div>
-        <div class="pctBig${pct < 0 ? " dn" : ""}">${pctStr(pct)}</div>
-      </div>
-      <div class="meta">
-        <div class="mcol">累计投入<b>¥${money(invested)}</b></div>
-        <div class="arr2">→</div>
-        <div class="mcol">现在值<b class="${pnl < 0 ? "dn" : "up"}">¥${money(value)}</b></div>
-      </div>
-    </div>
-
-    <div class="sec"><div class="t">每只明细</div><div class="r">黑 = 本金 · 红 = 浮盈</div></div>
-    <div class="rows">${rows}</div>
-  </div>
-  <div class="band"><div class="l">${d.tickers.join(" / ")}</div><div class="r">${esc(d.handle)}</div></div>`,
-  );
-}
-
 /* ───────────────────  F · 账户面板（极简版）  ───────────────────
    纯白背景、深蓝黑字、红涨绿跌、圆角卡片 + 细分割线，无衬线。
    像券商 APP 的资产页，不是海报。缺数据的地方一律显示「暂无数据」。 */
@@ -789,7 +654,6 @@ function themeTrend(d) {
 // 墨韵/森屿的实现仍保留在文件里，想换回来把对应主题加进这个对象即可
 const THEMES = {
   press: { render: themePress, w: 1080, h: 1440 },
-  data: { render: themeDashboard, w: 1080, h: 1440 },
   panel: { render: themePanel, w: 1080, h: 1440 },
   trend: { render: themeTrend, w: 1080, h: 1440 },
   wechat: { render: themeWechat, w: 900, h: 383 },
@@ -842,11 +706,6 @@ const THEME_INFO = {
     cn: "小红书封面",
     en: "PRESS · 3:4",
     desc: "黑白报刊 + 中国红，粗衬线大标题。1080×1440，导出 2160×2880。",
-  },
-  data: {
-    cn: "持仓看板",
-    en: "DATA · 3:4",
-    desc: "第二张图：累计浮盈大数字，每只一行「投入 → 现在」，条形黑的是本金、红的是浮盈。1080×1440，导出 2160×2880。",
   },
   panel: {
     cn: "账户面板 · 极简",
