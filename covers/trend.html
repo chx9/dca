@@ -259,7 +259,7 @@
 
   $("sub").textContent =
     `${data.from.replace(/-/g, ".")} – ${data.to.replace(/-/g, ".")} · 以区间首日收盘价为基准 · ` +
-    `数据来源 东方财富${data.fetchedAt ? " · 抓取于 " + data.fetchedAt.slice(0, 10) : ""}`;
+    `数据来源 ${data.source || "东方财富"}${data.fetchedAt ? " · 抓取于 " + data.fetchedAt.slice(0, 10) : ""}`;
 
   /* ── 悬停：十字线吸附到最近的交易日，读数覆盖全部三只标的 ── */
   const svgEl = chart.querySelector("svg");

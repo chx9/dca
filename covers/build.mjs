@@ -642,7 +642,7 @@ function themeTrend(d) {
 
     <div class="ttl">
       <div class="h1">近一月走势</div>
-      <div class="sub">${range ? `${range} · ` : ""}以区间首日收盘价为基准 · 数据来源 东方财富</div>
+      <div class="sub">${range ? `${range} · ` : ""}以区间首日收盘价为基准 · 数据来源 ${esc(q?.source || "东方财富")}</div>
     </div>
 
     <div class="chart">${chart}</div>
@@ -717,7 +717,7 @@ const THEME_INFO = {
   trend: {
     cn: "近一月走势",
     en: "TREND · 3:4",
-    desc: "真实行情曲线：三只标的按区间首日收盘价归一，横轴交易日、纵轴涨跌幅；底部明细表兼图例。数据由 node fetch-quotes.mjs 从东方财富日 K 拉取，没有数据时显示「暂无数据」。1080×1440，导出 2160×2880。",
+    desc: "真实行情曲线：三只标的按区间首日收盘价归一，横轴交易日、纵轴涨跌幅；底部明细表兼图例。数据由 fetch-quotes.mjs 拉取（东方财富为主、Nasdaq 兜底，本地缓存增量更新），没有数据时显示「暂无数据」。1080×1440，导出 2160×2880。",
   },
   wechat: {
     cn: "公众号头图",

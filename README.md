@@ -12,6 +12,7 @@
 ├── covers/                 图片生成器
 │   ├── build.mjs           所有版式都在这个文件里（五个主题）
 │   ├── fetch-quotes.mjs    拉真实行情（东方财富日 K）
+│   ├── app.mjs             网页生成器：填美元金额，自动换汇率出图
 │   ├── serve.mjs           热更服务器，存盘即重绘
 │   ├── issues/             每期的数据，一期一个 JSON
 │   ├── data/               行情缓存（fetch-quotes.mjs 生成）
@@ -26,6 +27,15 @@
 
 ```bash
 cd covers
+node app.mjs               # 打开 http://localhost:4330，填表出图（推荐）
+```
+
+网页里填三只标的的本期定投 / 累计定投 / 当前市值（**美元**），自动按
+frankfurter.dev 的 USD→CNY 汇率换算、拉最近 30 天行情、生成全部四张图。
+
+调版式时用热更服务器：
+
+```bash
 node serve.mjs 4321        # 打开 http://localhost:4321
 ```
 
@@ -56,7 +66,8 @@ node fetch-quotes.mjs 001      # 先拉行情，走势图才有数据
 ## 数据
 
 - **投资数据**（投入、市值、当期金额）手填在 `issues/<期号>.json`，浮盈和收益率由脚本按 `市值 − 投入` 计算。
-- **行情**由 `fetch-quotes.mjs` 从东方财富接口拉取，只取收盘价，不估算、不补数。
+- **行情**由 `fetch-quotes.mjs` 拉取（东方财富为主、Nasdaq 兜底），存本地缓存 `data/quotes-cache.json`，
+  每次只补新交易日；只取收盘价，不估算、不补数。
 - 缺数据的地方一律显示**「暂无数据」**，不会自动填充或推算。
 
 各家数据源的可用性、免费额度、接口路径（含 FMP / Alpha Vantage 需要 key 的部分）见
