@@ -386,10 +386,9 @@ function themePanel(d) {
   const pnlText = (n) => (n == null ? NA : `${n >= 0 ? "+" : "−"}¥${Math.abs(n).toLocaleString("en-US", { maximumFractionDigits: 0 })}`);
   const ovSize = fitFont([money(totalIn), money(totalVal), pnlText(totalPnl)], 246, 78, 34);
 
-  // 每只一行横排：左边标的，右边本期定投 / 累计投入 / 浮盈三栏；累计投入栏更宽、字号更大
+  // 每只一列：标的名称居中，下面本期定投 / 累计投入 / 浮盈三组数字同轴居中
   const rowMoney = rows.flatMap((h) => [money(h.per), money(h.inv), pnlText(h.pnl)]);
-  const rowSize = fitFont(rowMoney, 152, 60, 32);
-  const invSize = fitFont(rows.map((h) => money(h.inv)), 196, 78, 36);
+  const rowSize = fitFont(rowMoney, 252, 74, 36);
   const cards = (rows.length ? rows : [{}, {}, {}])
     .map((h, i) => {
       const s = SKIN[i % 3];
@@ -406,11 +405,11 @@ function themePanel(d) {
         ${badge}
         <div>
           <div class="cn">${esc(nm)}</div>
-          ${showTk ? `<div class="ct">${esc(tk)}</div>` : ""}
+          <div class="ct${showTk ? "" : " ghost"}">${showTk ? esc(tk) : "　"}</div>
         </div>
       </div>
       <div class="cell"><div class="k">本期定投</div><div class="v" style="font-size:${rowSize}px">${money(h.per)}</div><div class="pv ghost">　</div></div>
-      <div class="cell inv"><div class="k">累计投入</div><div class="v inv" style="font-size:${invSize}px">${money(h.inv)}</div><div class="pv ghost">　</div></div>
+      <div class="cell"><div class="k">累计投入</div><div class="v" style="font-size:${rowSize}px">${money(h.inv)}</div><div class="pv ghost">　</div></div>
       <div class="cell"><div class="k">浮盈</div><div class="v ${tone(h.pnl)}" style="font-size:${rowSize}px">${pnlText(h.pnl)}</div><div class="pv ${tone(h.pnl)}">${pctParen(h.rate)}</div></div>
     </div>`;
     })
@@ -434,22 +433,22 @@ function themePanel(d) {
   .counters { margin-top:34px; font-size:50px; font-weight:700; letter-spacing:5px; color:#c8161d; }
   .counters .sep { margin:0 6px; color:#1a1a1a; letter-spacing:0; }
 
-  /* 三行白卡：细边框、轻圆角、无渐变无阴影 */
-  .rows { flex:1; display:flex; flex-direction:column; gap:18px; margin-top:40px; }
-  .row { flex:1; display:flex; align-items:center; gap:24px; background:#ffffff; border:1px solid #e5e7eb; border-radius:14px; padding:0 34px; }
-  .rhd { flex:none; display:flex; align-items:center; gap:18px; min-width:262px; }
-  .badge { width:84px; height:84px; border-radius:10px; overflow:hidden; border:1px solid #e5e7eb; color:#fff; font-family:"Helvetica Neue",sans-serif; font-size:26px; font-weight:600; display:flex; align-items:center; justify-content:center; flex:none; }
+  /* 三列白卡：一列一只标的；标的名称与三组数字共用同一条中轴线 */
+  .rows { flex:1; display:flex; gap:18px; margin-top:40px; }
+  .row { flex:1; min-width:0; display:flex; flex-direction:column; align-items:center; background:#ffffff; border:1px solid #e5e7eb; border-radius:14px; padding:30px 18px 16px; }
+  .rhd { width:100%; display:flex; flex-direction:column; align-items:center; gap:12px; margin-bottom:14px; }
+  .badge { width:74px; height:74px; border-radius:10px; overflow:hidden; border:1px solid #e5e7eb; color:#fff; font-family:"Helvetica Neue",sans-serif; font-size:24px; font-weight:600; display:flex; align-items:center; justify-content:center; flex:none; }
   .badge img { width:100%; height:100%; display:block; }
-  .cn { font-size:36px; font-weight:700; letter-spacing:.5px; line-height:1.15; white-space:nowrap; color:#17243a; }
-  .ct { margin-top:4px; font-size:22px; font-weight:500; color:#7a8492; letter-spacing:2px; white-space:nowrap; }
-  .cell { flex:1; display:flex; flex-direction:column; align-items:flex-end; min-width:0; }
-  .cell.inv { flex:1.3; }                 /* 累计投入栏放宽，字号才能放大 */
-  .k { font-size:23px; font-weight:500; color:#7a8492; letter-spacing:2px; }
-  .v { margin-top:6px; font-size:66px; font-weight:700; letter-spacing:-1.8px; line-height:1.08; white-space:nowrap; color:#17243a; }
+  .cn { font-size:34px; font-weight:700; letter-spacing:.5px; line-height:1.15; white-space:nowrap; color:#17243a; }
+  .ct { margin-top:4px; font-size:20px; font-weight:500; color:#7a8492; letter-spacing:2px; white-space:nowrap; }
+  .ct.ghost { visibility:hidden; }
+  .cell { flex:1; width:100%; display:flex; flex-direction:column; align-items:center; justify-content:center; min-width:0; text-align:center; }
+  .cell + .cell { border-top:1px solid #eef0f2; }
+  .k { font-size:22px; font-weight:500; color:#7a8492; letter-spacing:2px; }
+  .v { margin-top:8px; font-size:66px; font-weight:700; letter-spacing:-1.8px; line-height:1.08; white-space:nowrap; color:#17243a; }
   .v.up, .pv.up { color:#d94b4b; }
   .v.dn, .pv.dn { color:#16866a; }
-  .v.inv { color:#c8161d; }               /* 累计投入：品牌红，与涨跌语义色区分 */
-  .pv { margin-top:4px; font-size:26px; font-weight:500; letter-spacing:.5px; white-space:nowrap; color:#7a8492; }
+  .pv { margin-top:6px; font-size:26px; font-weight:500; letter-spacing:.5px; white-space:nowrap; color:#7a8492; }
   .pv.ghost { visibility:hidden; }
 
   /* 总览：浅灰白底，三个并列数据区，数字是全图最大的一档 */
@@ -458,7 +457,6 @@ function themePanel(d) {
   .ovi + .ovi { border-left:1px solid #e5e7eb; }
   .ol { font-size:23px; font-weight:500; color:#7a8492; letter-spacing:2px; }
   .ovv { margin-top:14px; font-size:76px; font-weight:700; letter-spacing:-2px; line-height:1.05; white-space:nowrap; color:#17243a; }
-  .ovv.inv { color:#c8161d; }             /* 累计总投入：与每行累计投入同色 */
   .ovp { margin-top:10px; font-size:28px; font-weight:500; letter-spacing:.5px; color:#7a8492; }
   .ovi.pnl .ovv, .ovi.pnl .ovp { color:#d94b4b; }
   .ovi.pnl.dn .ovv, .ovi.pnl.dn .ovp { color:#16866a; }
@@ -478,7 +476,7 @@ function themePanel(d) {
     <div class="rows">${cards}</div>
 
     <div class="ov">
-      <div class="ovi"><div class="ol">累计总投入</div><div class="ovv inv" style="font-size:${ovSize}px">${money(totalIn)}</div></div>
+      <div class="ovi"><div class="ol">累计总投入</div><div class="ovv" style="font-size:${ovSize}px">${money(totalIn)}</div></div>
       <div class="ovi"><div class="ol">当前总市值</div><div class="ovv" style="font-size:${ovSize}px">${money(totalVal)}</div></div>
       <div class="ovi pnl ${tone(totalPnl)}">
         <div class="ol">累计总浮盈</div>
@@ -716,7 +714,7 @@ const THEME_INFO = {
   panel: {
     cn: "账户面板 · 极简",
     en: "PANEL · 3:4",
-    desc: "瑞士极简投资月报：报头报脚与封面同一套（红眉标 + 黑色页脚带），背景同为 #fafaf8。三张白卡（细灰边框）各一行「标的 / 累计投入 / 浮盈+收益率」，底部浅灰三栏总览。深海军蓝主色，红涨绿跌。金额按位数自动缩放。1080×1440，导出 2160×2880。",
+    desc: "瑞士极简投资月报：报头报脚与封面同一套（红眉标 + 黑色页脚带），背景同为 #fafaf8。三列白卡，一列一只标的：标的名称居中，下方本期定投 / 累计投入 / 浮盈+收益率三组数字与名称同轴居中。底部浅灰三栏总览。深海军蓝主色，红涨绿跌。金额按位数自动缩放。1080×1440，导出 2160×2880。",
   },
   trend: {
     cn: "近一月走势",
