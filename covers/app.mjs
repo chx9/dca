@@ -8,7 +8,7 @@
  * 再拉最近 30 天行情、跑 build.mjs，页面上直接看四张成品图。
  */
 import http from "node:http";
-import { readFileSync, writeFileSync, existsSync, readdirSync, mkdirSync } from "node:fs";
+import { readFileSync, writeFileSync, existsSync, readdirSync, mkdirSync, statSync } from "node:fs";
 import { execFile } from "node:child_process";
 import { join, dirname, extname, normalize } from "node:path";
 import { fileURLToPath } from "node:url";
@@ -65,6 +65,67 @@ const cachedFx = () => {
     return null;
   }
 };
+
+/* ── 定投记录：每次提交追加到 data/history.json，可回溯 / 回填 / 删除 ── */
+const HISTORY_FILE = join(ROOT, "data", "history.json");
+
+// 首次运行没有记录文件时，用 issues/*.json 回填（提交时间取文件修改时间，只是近似值）
+function seedHistory() {
+  const entries = [];
+  for (const f of readdirSync(join(ROOT, "issues")).sort()) {
+    const m = /^(\d+)\.json$/.exec(f);
+    if (!m) continue;
+    try {
+      const j = JSON.parse(readFileSync(join(ROOT, "issues", f), "utf8"));
+      entries.push({
+        id: `seed-${m[1]}`,
+        seeded: true,
+        submittedAt: statSync(join(ROOT, "issues", f)).mtime.toISOString(),
+        issue: Number(j.issue) || Number(m[1]),
+        issueId: m[1],
+        day: j.day ?? null,
+        start: j.start || null,
+        days: null,
+        fx: j.fx || null,
+        stocks: (j.holdings || []).map((h) => ({
+          name: h.name,
+          ticker: h.ticker,
+          usd: h.usd || { period: null, invested: null, value: null },
+          rmb: { period: h.period ?? null, invested: h.invested ?? null, value: h.value ?? null },
+        })),
+        title: j.title || null,
+        kicker: j.kicker || null,
+        handle: j.handle || null,
+      });
+    } catch {}
+  }
+  return entries;
+}
+
+// 返回 null 表示文件还不存在（触发回填）；文件损坏当空记录，不复活已删的
+function readHistory() {
+  if (!existsSync(HISTORY_FILE)) return null;
+  try {
+    const h = JSON.parse(readFileSync(HISTORY_FILE, "utf8"));
+    return Array.isArray(h) ? h : [];
+  } catch {
+    return [];
+  }
+}
+
+function getHistory() {
+  const h = readHistory();
+  if (h) return h;
+  const seeded = seedHistory();
+  writeFileSync(HISTORY_FILE, JSON.stringify(seeded, null, 2) + "\n");
+  return seeded;
+}
+
+function appendHistory(entry) {
+  const h = getHistory();
+  h.push(entry);
+  writeFileSync(HISTORY_FILE, JSON.stringify(h, null, 2) + "\n");
+}
 
 /* ── 小工具 ── */
 const pad3 = (n) => String(n).padStart(3, "0");
@@ -186,6 +247,31 @@ async function generate(body) {
   const b = await run(["build.mjs", id]);
   if (!b.ok) throw new Error(`build.mjs 失败：\n${b.log}`);
 
+  // 留档：每次成功提交追加一条定投记录（写失败不阻断出图）
+  try {
+    appendHistory({
+      id: now.toISOString(),
+      submittedAt: now.toISOString(),
+      issue: issueNo,
+      issueId: id,
+      day,
+      start: body.start,
+      days,
+      fx: { rate: fx.rate, date: fx.date, source: fx.source },
+      stocks: stocks.map((s, i) => ({
+        name: s.name,
+        ticker: s.ticker,
+        usd: { period: s.periodUsd, invested: s.investedUsd, value: s.valueUsd },
+        rmb: { period: holdings[i].period, invested: holdings[i].invested, value: holdings[i].value },
+      })),
+      title: data.title,
+      kicker: data.kicker,
+      handle: data.handle,
+    });
+  } catch (e) {
+    console.warn("定投记录写入失败：" + e.message);
+  }
+
   return {
     ok: true,
     issue: id,
@@ -239,6 +325,15 @@ const PAGE = `<!doctype html>
   .fxline b { font-size:22px; color:var(--red); }
   .fxline .src { font-size:12px; color:var(--muted); }
   .fxline input { width:110px; }
+  #histTable td { text-align:left; vertical-align:top; }
+  #histTable td.num { text-align:right; }
+  .hst { font-size:13px; line-height:1.9; white-space:nowrap; }
+  .hsub { color:var(--muted); font-size:12px; }
+  .tag { font-size:11px; color:var(--muted); border:1px solid var(--faint); border-radius:4px; padding:1px 5px; margin-left:6px; }
+  .rowbtn { font:inherit; font-size:12px; cursor:pointer; background:none; border:1px solid var(--faint);
+            border-radius:6px; padding:4px 10px; color:var(--muted); margin:0 0 6px 6px; white-space:nowrap; }
+  .rowbtn:hover { color:var(--ink); border-color:var(--muted); }
+  .rowbtn.del:hover { color:var(--up); border-color:var(--up); }
   .ghost-btn, button.go { font:inherit; cursor:pointer; border-radius:8px; }
   .ghost-btn { background:none; border:1px solid var(--faint); padding:8px 14px; font-size:13px; color:var(--muted); }
   button.go { margin-top:36px; width:100%; border:0; background:#111; color:#faf8f4;
@@ -311,6 +406,18 @@ const PAGE = `<!doctype html>
     </section>
   </details>
 
+  <details>
+    <summary>定投记录（每次提交自动留档）</summary>
+    <section>
+      <div class="sub" style="margin-bottom:14px">「回填」把这条记录填回上面表单，核对后再生成；「删除」只删这条记录，不动已生成的图片和 issues 数据。</div>
+      <table id="histTable">
+        <thead><tr><th>提交时间</th><th>期数</th><th>本期 / 累计 / 市值</th><th style="text-align:right">汇率</th><th></th></tr></thead>
+        <tbody id="histRows"></tbody>
+      </table>
+      <div class="sub" id="histEmpty" style="display:none">还没有记录。</div>
+    </section>
+  </details>
+
   <button class="go" id="go">生 成 封 面</button>
   <div class="status" id="status"></div>
 
@@ -368,6 +475,78 @@ $("fxRefresh").addEventListener("click", () => loadFx(true));
 
 fetch("/api/next-issue").then((r) => r.json()).then((j) => { $("issue").value = j.issue; });
 loadFx();
+loadHistory();
+
+/* ── 定投记录 ── */
+const escH = (s) => String(s ?? "").replace(/[&<>"]/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[c]));
+const fmtU = (n) => (n == null ? "—" : "$" + Number(n).toLocaleString("en-US", { maximumFractionDigits: 2 }));
+const fmtR = (n) => (n == null ? "—" : "¥" + Math.round(Number(n)).toLocaleString("en-US"));
+
+async function loadHistory() {
+  let list = [];
+  try {
+    const r = await fetch("/api/history");
+    list = await r.json();
+  } catch {}
+  if (!Array.isArray(list)) list = [];
+  $("histEmpty").style.display = list.length ? "none" : "block";
+  $("histRows").innerHTML = list.map((e, idx) => {
+    const t = e.submittedAt ? new Date(e.submittedAt) : null;
+    const when = t && !isNaN(t)
+      ? String(t.getMonth() + 1).padStart(2, "0") + "-" + String(t.getDate()).padStart(2, "0") + " " +
+        String(t.getHours()).padStart(2, "0") + ":" + String(t.getMinutes()).padStart(2, "0")
+      : "—";
+    const stocks = (e.stocks || []).map((s) => {
+      const u = s.usd || {};
+      const cell = (u.period != null || u.invested != null || u.value != null)
+        ? fmtU(u.period) + " / " + fmtU(u.invested) + " / " + fmtU(u.value)
+        : fmtR((s.rmb || {}).period) + " / " + fmtR((s.rmb || {}).invested) + " / " + fmtR((s.rmb || {}).value);
+      return '<div class="hst"><b>' + escH(s.name) + '</b>　' + cell + '</div>';
+    }).join("");
+    return '<tr><td style="white-space:nowrap">' + when + (e.seeded ? '<span class="tag">补录</span>' : '') + '</td>' +
+      '<td style="white-space:nowrap">第 ' + escH(e.issueId ?? e.issue) + ' 期' + (e.day ? '<br><span class="hsub">第 ' + e.day + ' 天</span>' : '') + '</td>' +
+      '<td>' + stocks + '</td>' +
+      '<td class="num" style="white-space:nowrap">' + (e.fx && e.fx.rate != null ? e.fx.rate : "—") +
+        (e.fx && e.fx.date ? '<br><span class="hsub">' + escH(e.fx.date) + '</span>' : '') + '</td>' +
+      '<td class="num" style="white-space:nowrap"><button class="rowbtn" data-act="refill" data-i="' + idx + '">回填</button>' +
+      '<button class="rowbtn del" data-act="del" data-i="' + idx + '">删除</button></td></tr>';
+  }).join("");
+  $("histRows").querySelectorAll("button").forEach((b) =>
+    b.addEventListener("click", () => {
+      const e = list[Number(b.dataset.i)];
+      if (!e) return;
+      if (b.dataset.act === "refill") refill(e);
+      else delEntry(e);
+    }));
+}
+
+function refill(e) {
+  $("issue").value = e.issue ?? "";
+  if (e.start) $("start").value = e.start;
+  if (e.days) $("days").value = String(e.days);
+  if (Array.isArray(e.title)) { $("t1").value = e.title[0] || ""; $("t2").value = e.title[1] || ""; }
+  if (e.kicker != null) $("kicker").value = e.kicker;
+  if (e.handle != null) $("handle").value = e.handle;
+  STOCKS.forEach((s, i) => {
+    const st = (e.stocks || []).find((x) => x.ticker === s.ticker);
+    const u = (st && st.usd) || {};
+    for (const k of ["period", "invested", "value"]) {
+      document.querySelector('input[data-i="' + i + '"][data-k="' + k + '"]').value = u[k] ?? "";
+    }
+  });
+  totals();
+  window.scrollTo({ top: 0, behavior: "smooth" });
+}
+
+async function delEntry(e) {
+  if (!confirm("删除第 " + (e.issueId ?? e.issue) + " 期的这条提交记录？只删记录，不动已生成的图片。")) return;
+  const r = await fetch("/api/history/delete", {
+    method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ id: e.id }),
+  });
+  const j = await r.json();
+  if (!j.ok) return alert("删除失败：" + (j.error || "未知错误"));
+  loadHistory();
+}
 
 $("go").addEventListener("click", async () => {
   const btn = $("go"), st = $("status");
@@ -404,6 +583,7 @@ $("go").addEventListener("click", async () => {
     $("results").classList.add("on");
     st.textContent = "✓ 第 " + j.day + " 天 · 第 " + j.issue + " 期　汇率 " + j.fx.rate + "（" + j.fx.date + "）" +
       (j.quotes ? "　行情 " + j.from + " → " + j.to : "　⚠ 行情没拉到，走势图显示「暂无数据」");
+    loadHistory();
   } catch (e) {
     st.className = "status err";
     st.textContent = "✗ " + e.message;
@@ -418,7 +598,7 @@ $("go").addEventListener("click", async () => {
 /* ── HTTP ── */
 const server = http.createServer(async (req, res) => {
   const url = new URL(req.url, "http://x");
-  const path = normalize(decodeURIComponent(url.pathname)).replace(/^(\.\.[/\\])+/, "");
+  const path = normalize(decodeURIComponent(url.pathname)).replace(/\\/g, "/").replace(/^(\.\.[/\\])+/, "");
   const send = (code, type, body) => {
     res.writeHead(code, { "Content-Type": type });
     res.end(body);
@@ -442,6 +622,33 @@ const server = http.createServer(async (req, res) => {
       if (c) return send(200, MIME[".json"], JSON.stringify({ ...c, stale: true, error: e.message }));
       return send(200, MIME[".json"], JSON.stringify({ error: e.message }));
     }
+  }
+
+  if (path === "/api/history") {
+    // 新的提交排在前面
+    return send(200, MIME[".json"], JSON.stringify([...getHistory()].reverse()));
+  }
+
+  if (path === "/api/history/delete" && req.method === "POST") {
+    let body = "";
+    req.on("data", (c) => (body += c));
+    req.on("end", async () => {
+      try {
+        const { id } = JSON.parse(body || "{}");
+        // 走串行队列，避免和 generate 里的 appendHistory 读写打架
+        const out = await enqueue(() => {
+          const h = getHistory();
+          const left = h.filter((e) => e.id !== id);
+          if (left.length === h.length) throw new Error("没找到这条记录");
+          writeFileSync(HISTORY_FILE, JSON.stringify(left, null, 2) + "\n");
+          return { ok: true, left: left.length };
+        });
+        send(200, MIME[".json"], JSON.stringify(out));
+      } catch (e) {
+        send(200, MIME[".json"], JSON.stringify({ ok: false, error: e.message }));
+      }
+    });
+    return;
   }
 
   if (path === "/api/generate" && req.method === "POST") {

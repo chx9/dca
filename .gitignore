@@ -6,6 +6,9 @@ covers/gallery.html
 # 汇率缓存每天变，不入库；行情缓存 quotes-cache.json 是累积数据，保留
 covers/data/fx.json
 
+# 字体：100+ MB 二进制，跑 node fetch-fonts.mjs 就能重新生成，不入库
+covers/assets/fonts/
+
 # 系统
 .DS_Store
 node_modules/

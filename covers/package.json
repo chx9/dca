@@ -1,0 +1,19 @@
+{
+  "name": "dca-covers",
+  "version": "1.0.0",
+  "private": true,
+  "description": "定投封面图生成器：HTML/CSS 模板 → satori 排版 → resvg 栅格化，纯 Node 渲染，无需浏览器",
+  "scripts": {
+    "start": "node app.mjs",
+    "serve": "node serve.mjs",
+    "build": "node build.mjs",
+    "quotes": "node fetch-quotes.mjs",
+    "fonts": "node fetch-fonts.mjs"
+  },
+  "dependencies": {
+    "@resvg/resvg-js": "^2.6.2",
+    "jimp": "^1.6.1",
+    "satori": "^0.63.2",
+    "ultrahtml": "^1.7.0"
+  }
+}

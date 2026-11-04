@@ -15,10 +15,18 @@
 
 墨韵（宣纸 + 朱砂）和森屿（森林绿 + 奶油白 + 焦糖金）的实现仍保留在 `build.mjs` 里，想换回来把对应主题加进 `THEMES` 对象即可。
 
+## 首次准备
+
+```bash
+cd covers
+npm install            # 装渲染依赖（satori / resvg / ultrahtml / jimp）
+node fetch-fonts.mjs   # 下载字体并切出静态字重（需 Python 3 + pip install fontTools）
+```
+
 ## 网页生成器（最省事，推荐）
 
 ```bash
-cd ~/Project/xhs/covers
+cd covers
 node app.mjs           # 默认 4330，端口占用会顺延
 ```
 
@@ -31,11 +39,14 @@ node app.mjs           # 默认 4330，端口占用会顺延
 - 生成时会自动写 `issues/<期号>.json`（人民币值 + 美元原值 + 汇率都留着）、拉最近 N 天行情（走本地缓存，只补新交易日）、
   跑完整构建，页面上直接预览四张图并可下载
 - 「第 N 天」按生成当天和第一天的间隔自动算
+- 每次提交都会在 `data/history.json` 追加一条**定投记录**（提交时间、美元金额、汇率、文案）；
+  页面下方「定投记录」折叠区可回看、一键回填表单、删除单条（只删记录，不动已生成的图）。
+  首次打开会用 `issues/*.json` 自动补录历史（标「补录」，时间取文件修改时间）。台账随 git 提交备份
 
 ## 热更服务器（调版式时用）
 
 ```bash
-cd ~/Project/xhs/covers
+cd covers
 node serve.mjs          # 默认 4321，端口占用会顺延
 ```
 
@@ -44,7 +55,7 @@ node serve.mjs          # 默认 4321，端口占用会顺延
 ## 生成
 
 ```bash
-cd ~/Project/xhs/covers
+cd covers
 node build.mjs 001                 # 生成第 001 期的封面
 ```
 
@@ -53,7 +64,7 @@ node build.mjs 001                 # 生成第 001 期的封面
 ## 行情数据（走势图用）
 
 ```bash
-cd ~/Project/xhs/covers
+cd covers
 node fetch-quotes.mjs 001                        # 默认取上一个自然月
 node fetch-quotes.mjs 001 2026-10-01 2026-11-01  # 或手动指定区间
 ```
@@ -123,8 +134,16 @@ node fetch-quotes.mjs 001 2026-10-01 2026-11-01  # 或手动指定区间
 
 ## 依赖
 
-- macOS 自带字体：Songti SC、PingFang SC、DIN Alternate、Georgia
-- 本机 Google Chrome，headless 截图，无需安装其他依赖
+- Node.js 18+（用到全局 `fetch`）
+- `npm install` 的四个包：**satori**（HTML/CSS 排版成 SVG）、**@resvg/resvg-js**（SVG 栅格化成 PNG）、
+  **ultrahtml**（解析模板 HTML）、**jimp**（gallery 预览图转 JPEG）
+- 渲染字体：`node fetch-fonts.mjs` 下载 Noto Serif SC / Noto Sans SC 可变字体，用 Python
+  fontTools 切成 400/500/600/700/900 五个静态实例存 `assets/fonts/`（约 130 MB，不入库）。
+  需要本机 Python 3 + `pip install fontTools`，只需跑一次
+
+渲染管线是纯 Node（`render-node.mjs`），不需要 Chrome 或任何浏览器，macOS / Windows / Linux 都能跑。
+模板仍按浏览器 HTML/CSS 写，`render-node.mjs` 里有一层兼容翻译（satori 只支持 flex 布局、
+不支持伪类/逐字字体回退等，细节见文件头注释）。
 
 ## 号名待定
 

@@ -6,12 +6,11 @@
  *   node build.mjs 001 --theme ink  # 只生成某一个主题
  */
 import { readFileSync, writeFileSync, mkdirSync, existsSync, readdirSync } from "node:fs";
-import { execFileSync } from "node:child_process";
-import { dirname, join, resolve } from "node:path";
+import { dirname, join } from "node:path";
 import { fileURLToPath } from "node:url";
+import { htmlToPng, pngToJpeg } from "./render-node.mjs";
 
 const ROOT = dirname(fileURLToPath(import.meta.url));
-const CHROME = "/Applications/Google Chrome.app/Contents/MacOS/Google Chrome";
 const W = 1080;
 const H = 1440;
 
@@ -571,7 +570,7 @@ function themeTrend(d) {
     range = `${q.from.replace(/-/g, ".")} – ${q.to.replace(/-/g, ".")}`;
 
     table = `<div class="tbl">
-      <div class="th"><span>标的</span><span>最新收盘 · USD</span><span>区间涨跌</span></div>
+      <div class="th"><span class="lead">标的</span><span>最新收盘 · USD</span><span>区间涨跌</span></div>
       ${series
         .map(
           (s) => `<div class="tr">
@@ -618,8 +617,8 @@ function themeTrend(d) {
   .tbl { margin-top:auto; padding-top:40px; }
   .th, .tr { display:flex; align-items:baseline; }
   .th { padding-bottom:14px; border-bottom:1px solid #1a1a1a; font-size:20px; letter-spacing:3px; color:#7a8492; }
-  .th span:first-child { flex:1; }
-  .th span:nth-child(2), .th span:nth-child(3) { width:196px; text-align:right; }
+  .th span { width:196px; text-align:right; }
+  .th .lead { flex:1; width:auto; text-align:left; }
   .tr { padding:15px 0; border-bottom:1px solid #e5e7eb; }
   .nm { flex:1; display:flex; align-items:center; gap:14px; font-size:30px; font-weight:700; color:#17243a; }
   .nm i { width:14px; height:14px; border-radius:50%; flex:none; }
@@ -662,11 +661,7 @@ const THEMES = {
   wechat: { render: themeWechat, w: 900, h: 383 },
 };
 
-// ── 渲染 ──
-if (!existsSync(CHROME)) {
-  console.error("找不到 Google Chrome，无法渲染。");
-  process.exit(1);
-}
+// ── 渲染（render-node.mjs：satori + resvg，无浏览器） ──
 mkdirSync(join(ROOT, ".build"), { recursive: true });
 mkdirSync(join(ROOT, "out"), { recursive: true });
 
@@ -681,24 +676,9 @@ for (const name of picked) {
   const htmlPath = join(ROOT, ".build", `${issueId}-${name}.html`);
   const outPath = join(ROOT, "out", `${issueId}-${name}.png`);
   const theme = THEMES[name];
-  writeFileSync(htmlPath, theme.render(issue), "utf8");
-  execFileSync(
-    CHROME,
-    [
-      "--headless=new",
-      "--disable-gpu",
-      "--hide-scrollbars",
-      "--no-first-run",
-      "--no-default-browser-check",
-      "--user-data-dir=/tmp/xhs-cover-chrome",
-      `--window-size=${theme.w},${theme.h}`,
-      "--force-device-scale-factor=2",
-      "--virtual-time-budget=3000",
-      `--screenshot=${outPath}`,
-      resolve(htmlPath),
-    ],
-    { stdio: "ignore", timeout: 60_000 },
-  );
+  const html = theme.render(issue);
+  writeFileSync(htmlPath, html, "utf8"); // 留档便于调版式
+  writeFileSync(outPath, await htmlToPng(html, theme.w, theme.h));
   console.log(`✓ ${outPath}`);
 }
 
@@ -727,7 +707,7 @@ const THEME_INFO = {
   },
 };
 
-function buildGallery() {
+async function buildGallery() {
   const outDir = join(ROOT, "out");
   const previewDir = join(ROOT, ".build", "previews");
   mkdirSync(previewDir, { recursive: true });
@@ -750,25 +730,24 @@ function buildGallery() {
   }
   if (!issues.size) return null;
 
-  const cards = [...issues.entries()]
-    .sort((a, b) => a[0].localeCompare(b[0]))
-    .map(([id, list]) => {
-      let data = {};
-      const cfgPath = join(ROOT, "issues", `${id}.json`);
-      if (existsSync(cfgPath)) data = JSON.parse(readFileSync(cfgPath, "utf8"));
+  const cards = (
+    await Promise.all(
+      [...issues.entries()]
+        .sort((a, b) => a[0].localeCompare(b[0]))
+        .map(async ([id, list]) => {
+          let data = {};
+          const cfgPath = join(ROOT, "issues", `${id}.json`);
+          if (existsSync(cfgPath)) data = JSON.parse(readFileSync(cfgPath, "utf8"));
 
-      const items = Object.keys(THEME_INFO)
-        .map((t) => {
+          const items = (
+            await Promise.all(
+              Object.keys(THEME_INFO).map(async (t) => {
           const hit = list.find((x) => x.theme === t);
           if (!hit) return "";
           // 用 JPEG 内嵌到网页里，体积小、手机上也能直接存图；原始 PNG 仍在 out/
           const jpgName = hit.file.replace(/\.png$/, ".jpg");
           const jpgPath = join(previewDir, jpgName);
-          execFileSync(
-            "sips",
-            ["-s", "format", "jpeg", "-s", "formatOptions", "92", join(outDir, hit.file), "--out", jpgPath],
-            { stdio: "ignore" },
-          );
+          await pngToJpeg(join(outDir, hit.file), jpgPath);
           const b64 = readFileSync(jpgPath).toString("base64");
           const info = THEME_INFO[t];
           return `<article class="card">
@@ -778,10 +757,11 @@ function buildGallery() {
             <a class="btn" download="${jpgName}" href="#">保存封面</a>
             <a class="btn ghost" download="${hit.file}" href="out/${hit.file}">PNG 原图</a>
           </article>`;
-        })
-        .join("");
+              }),
+            )
+          ).join("");
 
-      return `<section class="issue">
+          return `<section class="issue">
         <div class="issue-head">
           <h2>第 ${String(Number(id)).padStart(2, "0")} 期</h2>
           <span>${esc(data.month || "")}</span>
@@ -789,8 +769,9 @@ function buildGallery() {
         ${data.title ? `<p class="issue-title">${data.title.map((t) => esc(t.replace(/[~*]/g, "").trim())).join(" / ")}</p>` : ""}
         <div class="grid">${items}</div>
       </section>`;
-    })
-    .join("");
+        }),
+    )
+  ).join("");
 
   const html = `<!doctype html>
 <html lang="zh-CN"><head><meta charset="utf-8">
@@ -886,5 +867,5 @@ function buildGallery() {
   return p;
 }
 
-const galleryPath = buildGallery();
+const galleryPath = await buildGallery();
 if (galleryPath) console.log(`✓ ${galleryPath}`);
