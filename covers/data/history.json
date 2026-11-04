@@ -1,0 +1,766 @@
+[
+  {
+    "id": "seed-001",
+    "seeded": true,
+    "submittedAt": "2026-11-04T13:01:36.703Z",
+    "issue": 1,
+    "issueId": "001",
+    "day": null,
+    "start": "2026-11-01",
+    "days": null,
+    "fx": null,
+    "stocks": [
+      {
+        "name": "纳指",
+        "ticker": "IQQ",
+        "usd": {
+          "period": null,
+          "invested": null,
+          "value": null
+        },
+        "rmb": {
+          "period": 3000,
+          "invested": 3000,
+          "value": 3072.6
+        }
+      },
+      {
+        "name": "伯克希尔",
+        "ticker": "BRK.B",
+        "usd": {
+          "period": null,
+          "invested": null,
+          "value": null
+        },
+        "rmb": {
+          "period": 2000,
+          "invested": 2000,
+          "value": 2015.4
+        }
+      },
+      {
+        "name": "SCHD",
+        "ticker": "SCHD",
+        "usd": {
+          "period": null,
+          "invested": null,
+          "value": null
+        },
+        "rmb": {
+          "period": 1000,
+          "invested": 1000,
+          "value": 993.8
+        }
+      }
+    ],
+    "title": [
+      "*十年定投*",
+      "~纳指、伯克希尔、SCHD"
+    ],
+    "kicker": "坚持定投 · 慢慢变富 · 早日退休",
+    "handle": "@奔放游民"
+  },
+  {
+    "id": "seed-003",
+    "seeded": true,
+    "submittedAt": "2026-11-04T13:01:36.709Z",
+    "issue": 3,
+    "issueId": "003",
+    "day": 1,
+    "start": "2026-11-17",
+    "days": null,
+    "fx": {
+      "rate": 6.6533,
+      "date": "2026-11-02",
+      "source": "frankfurter.dev · ECB 参考汇率"
+    },
+    "stocks": [
+      {
+        "name": "纳指",
+        "ticker": "IQQ",
+        "usd": {
+          "period": 122,
+          "invested": 23,
+          "value": 312
+        },
+        "rmb": {
+          "period": 811.7,
+          "invested": 153.03,
+          "value": 2075.83
+        }
+      },
+      {
+        "name": "伯克希尔",
+        "ticker": "BRK.B",
+        "usd": {
+          "period": 123,
+          "invested": 23,
+          "value": 23
+        },
+        "rmb": {
+          "period": 818.36,
+          "invested": 153.03,
+          "value": 153.03
+        }
+      },
+      {
+        "name": "SCHD",
+        "ticker": "SCHD",
+        "usd": {
+          "period": 231,
+          "invested": 2312,
+          "value": 23123
+        },
+        "rmb": {
+          "period": 1536.91,
+          "invested": 15382.43,
+          "value": 153844.26
+        }
+      }
+    ],
+    "title": [
+      "*十年定投*"
+    ],
+    "kicker": "坚持定投 · 慢慢变富 · 早日退休",
+    "handle": "@奔放游民"
+  },
+  {
+    "id": "seed-004",
+    "seeded": true,
+    "submittedAt": "2026-11-04T13:01:36.709Z",
+    "issue": 4,
+    "issueId": "004",
+    "day": 1,
+    "start": "2026-11-11",
+    "days": null,
+    "fx": {
+      "rate": 6.6533,
+      "date": "2026-11-02",
+      "source": "frankfurter.dev · ECB 参考汇率"
+    },
+    "stocks": [
+      {
+        "name": "纳指",
+        "ticker": "IQQ",
+        "usd": {
+          "period": 23,
+          "invested": 23123,
+          "value": 232323
+        },
+        "rmb": {
+          "period": 153.03,
+          "invested": 153844.26,
+          "value": 1545714.62
+        }
+      },
+      {
+        "name": "伯克希尔",
+        "ticker": "BRK.B",
+        "usd": {
+          "period": 2323,
+          "invested": 2323,
+          "value": 2323
+        },
+        "rmb": {
+          "period": 15455.62,
+          "invested": 15455.62,
+          "value": 15455.62
+        }
+      },
+      {
+        "name": "SCHD",
+        "ticker": "SCHD",
+        "usd": {
+          "period": 2323,
+          "invested": 2323,
+          "value": 2323
+        },
+        "rmb": {
+          "period": 15455.62,
+          "invested": 15455.62,
+          "value": 15455.62
+        }
+      }
+    ],
+    "title": [
+      "*十年定投*"
+    ],
+    "kicker": "坚持定投 · 慢慢变富 · 早日退休",
+    "handle": "@奔放游民"
+  },
+  {
+    "id": "seed-005",
+    "seeded": true,
+    "submittedAt": "2026-11-04T13:01:36.712Z",
+    "issue": 5,
+    "issueId": "005",
+    "day": 1,
+    "start": "2026-11-05",
+    "days": null,
+    "fx": {
+      "rate": 6.6533,
+      "date": "2026-11-02",
+      "source": "frankfurter.dev · ECB 参考汇率"
+    },
+    "stocks": [
+      {
+        "name": "纳指",
+        "ticker": "IQQ",
+        "usd": {
+          "period": 2312,
+          "invested": 323,
+          "value": 442
+        },
+        "rmb": {
+          "period": 15382.43,
+          "invested": 2149.02,
+          "value": 2940.76
+        }
+      },
+      {
+        "name": "伯克希尔",
+        "ticker": "BRK.B",
+        "usd": {
+          "period": 332,
+          "invested": 23,
+          "value": 23
+        },
+        "rmb": {
+          "period": 2208.9,
+          "invested": 153.03,
+          "value": 153.03
+        }
+      },
+      {
+        "name": "SCHD",
+        "ticker": "SCHD",
+        "usd": {
+          "period": 323,
+          "invested": 23,
+          "value": 232
+        },
+        "rmb": {
+          "period": 2149.02,
+          "invested": 153.03,
+          "value": 1543.57
+        }
+      }
+    ],
+    "title": [
+      "*十年定投*"
+    ],
+    "kicker": "坚持定投 · 慢慢变富 · 早日退休",
+    "handle": "@奔放游民"
+  },
+  {
+    "id": "seed-006",
+    "seeded": true,
+    "submittedAt": "2026-11-04T13:01:36.712Z",
+    "issue": 6,
+    "issueId": "006",
+    "day": 1,
+    "start": "2026-11-05",
+    "days": null,
+    "fx": {
+      "rate": 6.6544,
+      "date": "2026-11-03",
+      "source": "frankfurter.dev · ECB 参考汇率"
+    },
+    "stocks": [
+      {
+        "name": "纳指",
+        "ticker": "IQQ",
+        "usd": {
+          "period": 23,
+          "invested": 2323,
+          "value": 2323
+        },
+        "rmb": {
+          "period": 153.05,
+          "invested": 15458.17,
+          "value": 15458.17
+        }
+      },
+      {
+        "name": "伯克希尔",
+        "ticker": "BRK.B",
+        "usd": {
+          "period": 232,
+          "invested": 2323,
+          "value": 2323
+        },
+        "rmb": {
+          "period": 1543.82,
+          "invested": 15458.17,
+          "value": 15458.17
+        }
+      },
+      {
+        "name": "SCHD",
+        "ticker": "SCHD",
+        "usd": {
+          "period": 2322.51,
+          "invested": 2323,
+          "value": 2323
+        },
+        "rmb": {
+          "period": 15454.91,
+          "invested": 15458.17,
+          "value": 15458.17
+        }
+      }
+    ],
+    "title": [
+      "*十年定投*"
+    ],
+    "kicker": "坚持定投 · 慢慢变富 · 早日退休",
+    "handle": "@奔放游民"
+  },
+  {
+    "id": "seed-007",
+    "seeded": true,
+    "submittedAt": "2026-11-04T13:01:36.713Z",
+    "issue": 7,
+    "issueId": "007",
+    "day": 1,
+    "start": "2026-11-05",
+    "days": null,
+    "fx": {
+      "rate": 6.6544,
+      "date": "2026-11-03",
+      "source": "frankfurter.dev · ECB 参考汇率"
+    },
+    "stocks": [
+      {
+        "name": "纳指",
+        "ticker": "IQQ",
+        "usd": {
+          "period": 34,
+          "invested": 23,
+          "value": 232
+        },
+        "rmb": {
+          "period": 226.25,
+          "invested": 153.05,
+          "value": 1543.82
+        }
+      },
+      {
+        "name": "伯克希尔",
+        "ticker": "BRK.B",
+        "usd": {
+          "period": 323,
+          "invested": 23,
+          "value": 232
+        },
+        "rmb": {
+          "period": 2149.37,
+          "invested": 153.05,
+          "value": 1543.82
+        }
+      },
+      {
+        "name": "SCHD",
+        "ticker": "SCHD",
+        "usd": {
+          "period": 23,
+          "invested": 23,
+          "value": 323
+        },
+        "rmb": {
+          "period": 153.05,
+          "invested": 153.05,
+          "value": 2149.37
+        }
+      }
+    ],
+    "title": [
+      "*十年定投*"
+    ],
+    "kicker": "坚持定投 · 慢慢变富 · 早日退休",
+    "handle": "@奔放游民"
+  },
+  {
+    "id": "seed-008",
+    "seeded": true,
+    "submittedAt": "2026-11-04T13:01:36.716Z",
+    "issue": 8,
+    "issueId": "008",
+    "day": 1,
+    "start": "2026-11-05",
+    "days": null,
+    "fx": {
+      "rate": 6.6544,
+      "date": "2026-11-03",
+      "source": "frankfurter.dev · ECB 参考汇率"
+    },
+    "stocks": [
+      {
+        "name": "纳指",
+        "ticker": "IQQ",
+        "usd": {
+          "period": 34,
+          "invested": 231,
+          "value": 23
+        },
+        "rmb": {
+          "period": 226.25,
+          "invested": 1537.17,
+          "value": 153.05
+        }
+      },
+      {
+        "name": "伯克希尔",
+        "ticker": "BRK.B",
+        "usd": {
+          "period": 32,
+          "invested": 23,
+          "value": 23
+        },
+        "rmb": {
+          "period": 212.94,
+          "invested": 153.05,
+          "value": 153.05
+        }
+      },
+      {
+        "name": "SCHD",
+        "ticker": "SCHD",
+        "usd": {
+          "period": 23,
+          "invested": 23,
+          "value": 23
+        },
+        "rmb": {
+          "period": 153.05,
+          "invested": 153.05,
+          "value": 153.05
+        }
+      }
+    ],
+    "title": [
+      "*十年定投*"
+    ],
+    "kicker": "坚持定投 · 慢慢变富 · 早日退休",
+    "handle": "@奔放游民"
+  },
+  {
+    "id": "seed-009",
+    "seeded": true,
+    "submittedAt": "2026-11-04T13:17:00.765Z",
+    "issue": 9,
+    "issueId": "009",
+    "day": 1,
+    "start": "2026-11-05",
+    "days": null,
+    "fx": {
+      "rate": 6.6637,
+      "date": "2026-11-04",
+      "source": "frankfurter.dev · ECB 参考汇率"
+    },
+    "stocks": [
+      {
+        "name": "纳指",
+        "ticker": "IQQ",
+        "usd": {
+          "period": 23,
+          "invested": 23,
+          "value": 23
+        },
+        "rmb": {
+          "period": 153.27,
+          "invested": 153.27,
+          "value": 153.27
+        }
+      },
+      {
+        "name": "伯克希尔",
+        "ticker": "BRK.B",
+        "usd": {
+          "period": 23,
+          "invested": 23,
+          "value": 23
+        },
+        "rmb": {
+          "period": 153.27,
+          "invested": 153.27,
+          "value": 153.27
+        }
+      },
+      {
+        "name": "SCHD",
+        "ticker": "SCHD",
+        "usd": {
+          "period": 23,
+          "invested": 23,
+          "value": 23
+        },
+        "rmb": {
+          "period": 153.27,
+          "invested": 153.27,
+          "value": 153.27
+        }
+      }
+    ],
+    "title": [
+      "*十年定投*"
+    ],
+    "kicker": "坚持定投 · 慢慢变富 · 早日退休",
+    "handle": "@奔放游民"
+  },
+  {
+    "id": "seed-010",
+    "seeded": true,
+    "submittedAt": "2026-11-04T13:17:11.443Z",
+    "issue": 10,
+    "issueId": "010",
+    "day": 1,
+    "start": "2026-11-05",
+    "days": null,
+    "fx": {
+      "rate": 6.6637,
+      "date": "2026-11-04",
+      "source": "frankfurter.dev · ECB 参考汇率"
+    },
+    "stocks": [
+      {
+        "name": "纳指",
+        "ticker": "IQQ",
+        "usd": {
+          "period": 23,
+          "invested": 23,
+          "value": 23
+        },
+        "rmb": {
+          "period": 153.27,
+          "invested": 153.27,
+          "value": 153.27
+        }
+      },
+      {
+        "name": "伯克希尔",
+        "ticker": "BRK.B",
+        "usd": {
+          "period": 23,
+          "invested": 23,
+          "value": 23
+        },
+        "rmb": {
+          "period": 153.27,
+          "invested": 153.27,
+          "value": 153.27
+        }
+      },
+      {
+        "name": "SCHD",
+        "ticker": "SCHD",
+        "usd": {
+          "period": 23,
+          "invested": 23,
+          "value": 23
+        },
+        "rmb": {
+          "period": 153.27,
+          "invested": 153.27,
+          "value": 153.27
+        }
+      }
+    ],
+    "title": [
+      "*十年定投*"
+    ],
+    "kicker": "坚持定投 · 慢慢变富 · 早日退休",
+    "handle": "@奔放游民"
+  },
+  {
+    "id": "seed-011",
+    "seeded": true,
+    "submittedAt": "2026-11-04T14:50:22.371Z",
+    "issue": 11,
+    "issueId": "011",
+    "day": 1,
+    "start": "2026-11-05",
+    "days": null,
+    "fx": {
+      "rate": 6.6703,
+      "date": "2026-11-04",
+      "source": "frankfurter.dev · ECB 参考汇率"
+    },
+    "stocks": [
+      {
+        "name": "纳指",
+        "ticker": "IQQ",
+        "usd": {
+          "period": 23,
+          "invested": 3,
+          "value": 23
+        },
+        "rmb": {
+          "period": 153.42,
+          "invested": 20.01,
+          "value": 153.42
+        }
+      },
+      {
+        "name": "伯克希尔",
+        "ticker": "BRK.B",
+        "usd": {
+          "period": 23,
+          "invested": 3,
+          "value": 323
+        },
+        "rmb": {
+          "period": 153.42,
+          "invested": 20.01,
+          "value": 2154.51
+        }
+      },
+      {
+        "name": "SCHD",
+        "ticker": "SCHD",
+        "usd": {
+          "period": 23,
+          "invested": 23,
+          "value": 23
+        },
+        "rmb": {
+          "period": 153.42,
+          "invested": 153.42,
+          "value": 153.42
+        }
+      }
+    ],
+    "title": [
+      "*十年定投*"
+    ],
+    "kicker": "坚持定投 · 慢慢变富 · 早日退休",
+    "handle": "@奔放游民"
+  },
+  {
+    "id": "seed-012",
+    "seeded": true,
+    "submittedAt": "2026-11-04T15:15:04.186Z",
+    "issue": 12,
+    "issueId": "012",
+    "day": 1,
+    "start": "2026-11-05",
+    "days": null,
+    "fx": {
+      "rate": 6.6673,
+      "date": "2026-11-04",
+      "source": "frankfurter.dev · ECB 参考汇率"
+    },
+    "stocks": [
+      {
+        "name": "纳指",
+        "ticker": "IQQ",
+        "usd": {
+          "period": 23,
+          "invested": 23,
+          "value": 23
+        },
+        "rmb": {
+          "period": 153.35,
+          "invested": 153.35,
+          "value": 153.35
+        }
+      },
+      {
+        "name": "伯克希尔",
+        "ticker": "BRK.B",
+        "usd": {
+          "period": 23,
+          "invested": 23,
+          "value": 23
+        },
+        "rmb": {
+          "period": 153.35,
+          "invested": 153.35,
+          "value": 153.35
+        }
+      },
+      {
+        "name": "SCHD",
+        "ticker": "SCHD",
+        "usd": {
+          "period": 23,
+          "invested": 23,
+          "value": 23
+        },
+        "rmb": {
+          "period": 153.35,
+          "invested": 153.35,
+          "value": 153.35
+        }
+      }
+    ],
+    "title": [
+      "*十年定投*"
+    ],
+    "kicker": "坚持定投 · 慢慢变富 · 早日退休",
+    "handle": "@奔放游民"
+  },
+  {
+    "id": "2026-11-04T15:34:54.552Z",
+    "submittedAt": "2026-11-04T15:34:54.552Z",
+    "issue": 13,
+    "issueId": "013",
+    "day": 1,
+    "start": "2026-11-05",
+    "days": 30,
+    "fx": {
+      "rate": 6.6673,
+      "date": "2026-11-04",
+      "source": "frankfurter.dev · ECB 参考汇率"
+    },
+    "stocks": [
+      {
+        "name": "纳指",
+        "ticker": "IQQ",
+        "usd": {
+          "period": 2,
+          "invested": 3,
+          "value": 23
+        },
+        "rmb": {
+          "period": 13.33,
+          "invested": 20,
+          "value": 153.35
+        }
+      },
+      {
+        "name": "伯克希尔",
+        "ticker": "BRK.B",
+        "usd": {
+          "period": 2,
+          "invested": 23,
+          "value": 23
+        },
+        "rmb": {
+          "period": 13.33,
+          "invested": 153.35,
+          "value": 153.35
+        }
+      },
+      {
+        "name": "SCHD",
+        "ticker": "SCHD",
+        "usd": {
+          "period": 3,
+          "invested": 233,
+          "value": 23
+        },
+        "rmb": {
+          "period": 20,
+          "invested": 1553.48,
+          "value": 153.35
+        }
+      }
+    ],
+    "title": [
+      "*十年定投*"
+    ],
+    "kicker": "坚持定投 · 慢慢变富 · 早日退休",
+    "handle": "@奔放游民"
+  }
+]

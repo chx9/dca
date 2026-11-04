@@ -1,0 +1,72 @@
+{
+  "issue": 13,
+  "date": "2026.11",
+  "month": "2026 年 11 月",
+  "start": "2026-11-05",
+  "day": 1,
+  "title": [
+    "*十年定投*"
+  ],
+  "kicker": "坚持定投 · 慢慢变富 · 早日退休",
+  "handle": "@奔放游民",
+  "tickers": [
+    "IQQ",
+    "BRK.B",
+    "SCHD"
+  ],
+  "stats": [
+    {
+      "label": "本期定投",
+      "value": "47",
+      "prefix": "¥"
+    },
+    {
+      "label": "累计定投",
+      "value": "1,727",
+      "prefix": "¥"
+    }
+  ],
+  "holdings": [
+    {
+      "name": "纳指",
+      "ticker": "IQQ",
+      "period": 13.33,
+      "invested": 20,
+      "value": 153.35,
+      "usd": {
+        "period": 2,
+        "invested": 3,
+        "value": 23
+      }
+    },
+    {
+      "name": "伯克希尔",
+      "ticker": "BRK.B",
+      "period": 13.33,
+      "invested": 153.35,
+      "value": 153.35,
+      "usd": {
+        "period": 2,
+        "invested": 23,
+        "value": 23
+      }
+    },
+    {
+      "name": "SCHD",
+      "ticker": "SCHD",
+      "period": 20,
+      "invested": 1553.48,
+      "value": 153.35,
+      "usd": {
+        "period": 3,
+        "invested": 233,
+        "value": 23
+      }
+    }
+  ],
+  "fx": {
+    "rate": 6.6673,
+    "date": "2026-11-04",
+    "source": "frankfurter.dev · ECB 参考汇率"
+  }
+}

@@ -1,0 +1,72 @@
+{
+  "issue": 12,
+  "date": "2026.11",
+  "month": "2026 年 11 月",
+  "start": "2026-11-05",
+  "day": 1,
+  "title": [
+    "*ʮ�궨Ͷ*"
+  ],
+  "kicker": "��ֶ�Ͷ �� �����主 �� ��������",
+  "handle": "@��������",
+  "tickers": [
+    "IQQ",
+    "BRK.B",
+    "SCHD"
+  ],
+  "stats": [
+    {
+      "label": "本期定投",
+      "value": "460",
+      "prefix": "¥"
+    },
+    {
+      "label": "累计定投",
+      "value": "460",
+      "prefix": "¥"
+    }
+  ],
+  "holdings": [
+    {
+      "name": "纳指",
+      "ticker": "IQQ",
+      "period": 153.35,
+      "invested": 153.35,
+      "value": 153.35,
+      "usd": {
+        "period": 23,
+        "invested": 23,
+        "value": 23
+      }
+    },
+    {
+      "name": "伯克希尔",
+      "ticker": "BRK.B",
+      "period": 153.35,
+      "invested": 153.35,
+      "value": 153.35,
+      "usd": {
+        "period": 23,
+        "invested": 23,
+        "value": 23
+      }
+    },
+    {
+      "name": "SCHD",
+      "ticker": "SCHD",
+      "period": 153.35,
+      "invested": 153.35,
+      "value": 153.35,
+      "usd": {
+        "period": 23,
+        "invested": 23,
+        "value": 23
+      }
+    }
+  ],
+  "fx": {
+    "rate": 6.6673,
+    "date": "2026-11-04",
+    "source": "手动填写"
+  }
+}
